@@ -1,16 +1,19 @@
-import sys
 import json
-import socket
+import os
 import random
+import socket
+import sys
 
-import os, sys
 sys.path.append(os.getcwd())
+
 from lib.player_base import Player, PlayerShip
 
 
 class RandomPlayer(Player):
 
-    def __init__(self):
+    def __init__(self, seed=0):
+        random.seed(seed)
+
         # フィールドを2x2の配列として持っている．
         self.field = [[i, j] for i in range(Player.FIELD_SIZE)
                       for j in range(Player.FIELD_SIZE)]
@@ -43,9 +46,11 @@ class RandomPlayer(Player):
 
 
 # 仕様に従ってサーバとソケット通信を行う．
-def main(host, port):
+def main(host, port, seed=0):
+    assert isinstance(host, str) and isinstance(port, int)
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.connect((host, int(port)))
+        sock.connect((host, port))
         with sock.makefile(mode='rw', buffering=1) as sockfile:
             get_msg = sockfile.readline()
             print(get_msg)
@@ -69,7 +74,32 @@ def main(host, port):
                 elif info == "even":
                     break
                 else:
-                    raise RuntimeError('unknown information')
+                    raise RuntimeError("unknown information")
+
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Sample Player for Submaline Game")
+    parser.add_argument(
+        "host",
+        metavar="H",
+        type=str,
+        help="Hostname of the server. E.g., localhost",
+    )
+    parser.add_argument(
+        "port",
+        metavar="P",
+        type=int,
+        help="Port of the server. E.g., 2000",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        help="Random seed of the player",
+        required=False,
+        default=0,
+    )
+    args = parser.parse_args()
+
+    main(args.host, args.port, seed=args.seed)
