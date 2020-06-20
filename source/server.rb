@@ -1,5 +1,7 @@
+# coding: utf-8
 require 'json'
 require 'socket'
+require 'optparse'
 
 # プレイヤーの船を表すクラスである．
 class Ship
@@ -353,7 +355,7 @@ end
 def one_action(active, passive, c, server)
   act = active.gets
   results = server.action(c, act)
-  Reporter.report_field(results, c)
+  Reporter.report_field(results, c) unless $VERBOSE.nil?
   active.puts(results[0])
   passive.puts(results[1])
 
@@ -369,11 +371,13 @@ def one_action(active, passive, c, server)
 end
 
 # TCPコネクション上で処理を行う．
-def main(port)
-  tcp_server = TCPServer.open(port)
+def main(opts)
+  warn sprintf("listening %s %s", opts["ipaddr"], opts["port"])
+  tcp_server = TCPServer.open(opts["ipaddr"], opts["port"])
   sockets = []
-  2.times do
+  2.times do |i|
     sockets.push(tcp_server.accept)
+    warn sprintf("connected %d", i)
   end
   sockets.each do |socket|
     socket.puts("you are connected. please send me initial state.")
@@ -385,7 +389,7 @@ def main(port)
   i = 0
   # 行動プレイヤーを保持する変数．
   c = 0
-  Reporter.report_field(server.initial_condition(c), c)
+  Reporter.report_field(server.initial_condition(c), c) unless $VERBOSE.nil?
   begin
     sockets[c].puts("your turn")
     sockets[1-c].puts("waiting")
@@ -411,5 +415,12 @@ def main(port)
 end
 
 if __FILE__ == $0
-  main(ARGV[0])
+  opts = ARGV.getopts("", "ipaddr:127.0.0.1", "port:2000", "quiet")
+  if opts["quiet"]
+    $VERBOSE = nil
+  end
+  if ARGV[0]                    # backward compatibility
+    opts["port"] = ARGV[0]
+  end
+  main(opts)
 end
