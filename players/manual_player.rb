@@ -246,5 +246,6 @@ def main(host, port)
 end
 
 if __FILE__ == $0
+  $stdout.sync = true
   main(ARGV[0], ARGV[1])
 end
