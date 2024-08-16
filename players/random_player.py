@@ -12,7 +12,7 @@ from lib.player_base import Player, PlayerShip
 class RandomPlayer(Player):
 
     def __init__(self, seed=0):
-        random.seed(seed)
+        random.seed(seed or None)
 
         # フィールドを2x2の配列として持っている．
         self.field = [[i, j] for i in range(Player.FIELD_SIZE)
@@ -54,7 +54,7 @@ def main(host, port, seed=0):
         with sock.makefile(mode='rw', buffering=1) as sockfile:
             get_msg = sockfile.readline()
             print(get_msg)
-            player = RandomPlayer()
+            player = RandomPlayer(seed)
             sockfile.write(player.initial_condition()+'\n')
 
             while True:
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--seed",
         type=int,
-        help="Random seed of the player",
+        help="Random seed of the player (0 for urandom)",
         required=False,
         default=0,
     )
