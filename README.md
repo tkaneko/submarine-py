@@ -11,31 +11,30 @@
 4. 以上をいずれかのプレイヤーの艦が全て沈没するまで繰り返す。最後まで艦が残っていたプレイヤーが勝利する。
 
 ## ディレクトリ構成
-[/doc](/doc) ドキュメント 
-[/source](/source) サーバのプログラム 
-[/players](/players) AIのプログラム 
-[/lib](/lib) AIで共通に使う処理のライブラリ 
+- [/doc](/doc) ドキュメント 
+- [/src/submarine_py](/src/submarine_py) ライブラリ 
+- [/sample](/sample) server や player のサンプル
+- [/test](/test) test
 
 
 ## 実行
-- サーバー, マニュアルプレイヤー: ruby >= 2.0
-- ランダムプレイヤー: python >= 3.5
+- サーバ、ランダムプレイヤー: python >= 3.10
 
 まずポート番号を指定してサーバを起動する。
 ```
-$ ruby source/server.rb 2000
+$ python3 sample/server.py localhost 2000
 ```
-サーバをつけたら、アドレスとポート番号を指定してクライアントを起動する。
+サーバを起動したら、アドレスとポート番号を指定してクライアントを起動する。
 ```
-$ python3 players/random_player.py localhost 2000
+$ python3 sample/random_player.py localhost 2000
 ```
-二つクライアントプログラムが繋がったらゲームが開始する。 
-人間プレイ用に[manual_player.rb](/players/manual_player.rb)が用意してある。ターミナル上でキー入力をして行動を指示する。以下のような感じなのでターミナルを広めにして起動したほうが良い。 
+同様にもう一度起動してクライアントプログラムが2つ繋がったらゲームが開始する。 
+人間プレイ用に[manual_player.py](/sample/manual_player.py)が用意してある。ターミナル上でキー入力をして行動を指示する。以下のような感じなのでターミナルを広めにして起動したほうが良い。 
 マスには艦の種類のアルファベット1文字と、残りHPが表示される。自分あるいは相手が攻撃したマスには!がつく。その他相手の行動やHPなどの情報はテキストで出力される。 
 ```
-$ ruby players/manual_player.rb localhost 2000
+$ python sample/manual_player.py localhost 2000
 you are connected. please send me initial state.
-please input x, y in 0 ~ 4
+please input x, y in [0, 4]
 w
 x = 0
 y = 0
@@ -59,8 +58,8 @@ y = 2
 ------------------------
 
 waiting
-enemy attacked [3, 4] near ["c"]
-enemy ships: w:3 c:2 s:1
+opponent attacked [3, 4] near ["c"]
+opponent ships: w:3 c:2 s:1
    | 0 | 1 | 2 | 3 | 4 |
 ------------------------
  0 | w3|   |   |   |   |
@@ -83,7 +82,7 @@ a
 x = 3
 y = 3
 you attacked [3, 3] near ["w", "c"]
-enemy ships: w:3 c:2 s:1
+opponent ships: w:3 c:2 s:1
    | 0 | 1 | 2 | 3 | 4 |
 ------------------------
  0 | w3|   |   |   |   |

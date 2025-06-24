@@ -63,12 +63,12 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
         - position 攻撃した座標
         - hit 命中した場合に存在。攻撃された艦。戦艦"w"、巡洋艦"c"、潜水艦"s"
         - near 隣接マスを攻撃した場合に存在。艦種の配列
-- condition 行動終了後のフィールドや耐久値の状態。hpが0の艦についての情報は存在しない
+- observation 行動終了後のフィールドや耐久値の状態。hpが0の艦についての情報は存在しない
     - me 自分のデータ
         - ship 各艦
             - hp 残り耐久値
             - position 座標
-    - enemy 相手のデータ
+    - opponent 相手のデータ
         - ship 各艦
             - hp 残り耐久値
 
@@ -82,7 +82,7 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
             "near": ["c"]
         }
     },
-    "condition": {
+    "observation": {
         "me": {
             "w": {
                 "hp": 2,
@@ -97,7 +97,7 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
                 "position": [1,1]
             }
         },
-        "enemy": {
+        "opponent": {
             "w": {
                 "hp": 2
             },
@@ -122,7 +122,7 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
             "hit": "s"
         }
     },
-    "condition": {
+    "observation": {
         "me": {
             "w": {
                 "hp": 1,
@@ -137,7 +137,7 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
                 "position": [1,1]
             }
         },
-        "enemy": {
+        "opponent": {
         }
     }
 }
@@ -156,12 +156,12 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
     - moved 移動された場合に存在
         - ship 移動した艦
         - distance 座標の差分
-- condition 行動終了後のフィールドや耐久値の状態。hpが0の艦についての情報は存在しない
+- observation 行動終了後のフィールドや耐久値の状態。hpが0の艦についての情報は存在しない
     - me 自分のデータ
         - ship 各艦
             - hp 残り耐久値
             - position 座標
-    - enemy 相手のデータ
+    - opponent 相手のデータ
         - ship 各艦
             - hp 残り耐久値
 
@@ -175,7 +175,7 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
             "near": ["c"]
         }
     },
-    "condition": {
+    "observation": {
         "me": {
             "w": {
                 "hp": 2,
@@ -190,7 +190,7 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
                 "position": [1,1]
             }
         },
-        "enemy": {
+        "opponent": {
             "w": {
                 "hp": 3
             },
@@ -213,7 +213,7 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
             "distance": [0,-2]
         }
     },
-    "condition": {
+    "observation": {
         "me": {
             "w": {
                 "hp": 2,
@@ -228,7 +228,7 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
                 "position": [1,1]
             }
         },
-        "enemy": {
+        "opponent": {
             "w": {
                 "hp": 3
             },
@@ -244,9 +244,9 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
 ```
 相手の戦艦が上に2マス動いた。
 ```json
-{   
+{
     "outcome": true,
-    "condition": {
+    "observation": {
         "me": {
             "w": {
                 "hp": 2,
@@ -261,7 +261,7 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
                 "position": [1,1]
             }
         },
-        "enemy": {
+        "opponent": {
             "w": {
                 "hp": 3
             },
@@ -278,12 +278,14 @@ resultのattackedは行動プレイヤーは過去形、相手プレイヤーは
 相手の違反により勝利した。
 
 ## 通信の流れ
-1. サーバが起動する
-2. プレイヤーが二人接続する
-3. 接続確認メッセージ"you are connectd. please send me initial state.\n"が各クライアントに送られる
+1. サーバが起動し `Field` が定義される
+2. 接続した二人のプレイヤー (クライアント) に対して，それぞれ以下の通信で相互に相手を確認する
+   a. 接続確認メッセージ "This is a submarine_py server.  Tell me your name.\n" が送られる
+   b. クライアントから名前が一行でサーバに送られる
+3. サーバが各クライアントに `Field` 情報を1行のJSON形式で送る
 4. 各プレイヤーは艦の初期配置を上述のJSON形式で送る
-5. 行動できるプレイヤーには"your turn\n"、相手待ちのプレイヤーには"waiting\n"というメッセージが送られる
-6. 行動プレイヤーは行動を上述のJSON形式で送る
-7. 行動の結果が上述のJSON形式で各プレイヤーに送られる
-8. もし勝敗が決すれば勝利プレイヤーに"you win\n"、敗北プレイヤーに"you lose\n"のメッセージが送られる。ターンが10000回を超えると引き分けで、"even\n"が送られる。
-9. 6~8を勝敗が決するまで繰り返す
+5. ゲーム終了まで以下を繰り返す
+   a. 行動できるプレイヤーには"your turn\n"、相手の行動待ちのプレイヤーには"waiting\n"というメッセージが送られる
+   b. 行動プレイヤーは行動を上述のJSON形式で送る
+   c. 行動の結果が上述のJSON形式で各プレイヤーに送られる
+6. 勝敗が決すれば勝利プレイヤーに"you win\n"、敗北プレイヤーに"you lose\n"のメッセージが送られる。ターンが10000回を超えると引き分けで、"draw\n"が送られる。

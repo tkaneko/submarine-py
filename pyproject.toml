@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "submarine-py"
+version = "0.0.1"
+authors = [
+  {name = "T. Kaneko", email="kaneko@graco.c.u-tokyo.ac.jp"},
+]
+
+dependencies = [
+    'tabulate',
+    'pytest',
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
