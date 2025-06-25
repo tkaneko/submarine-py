@@ -239,7 +239,7 @@ def play_game(field, clients, *, quiet):
 def server_main(host: str, port: int, games: int, field: Field, *, quiet):
     listen_addr = (host, port)
     win_count = collections.Counter()
-    with socket.create_server(listen_addr, reuse_port=True) as s:
+    with socket.create_server(listen_addr) as s:
         # (1) server started
         for g in range(games):
             logging.info(f'waiting client players at {host}:{port}')

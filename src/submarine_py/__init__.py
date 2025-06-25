@@ -6,7 +6,7 @@ from .protocol import Protocol
 
 __all__ = [
     'Field', 'Ship',
-    'Player', 
+    'Player',
     'Reporter',
     'Protocol', 'play_game',
     # for sample/server.py
